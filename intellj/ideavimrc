@@ -1,0 +1,54 @@
+"" Optimized .ideavimrc - Matt Chapman
+
+"" Base Settings
+"" ========================================================
+set scrolloff=10
+set number
+set showmode
+set showcmd
+set smartcase
+set incsearch
+set hlsearch
+set visualbell
+set clipboard+=unnamed
+
+"" Plugin Settings
+"" ========================================================
+set surround
+set highlightedyank
+set sneak
+set nerdtree
+set easymotion
+set notimeout
+set which-key
+
+"" Which-key Configuration
+"" ========================================================
+let g:WhichKey_FontSize = 16
+let g:WhichKey_CommandColor = "#41ead4"
+let g:WhichKey_PrefixColor = "#f335b2"
+
+
+"" Key Mappings
+"" ========================================================
+inoremap jk <Esc>
+
+" Tab Navigation
+nnoremap <A-n> :tabnext<CR>
+nnoremap <A-p> :tabprev<CR>
+
+" Pane Navigation
+nnoremap <A-h> <C-w>h
+nnoremap <A-l> <C-w>l
+nnoremap <A-k> <C-w>k
+nnoremap <A-j> <C-w>j
+
+" Easy Visual Indentation
+vnoremap < <gv
+vnoremap > >gv
+
+"" Allow IDE shortcuts to work without conflicts
+"" ========================================================
+" Disable conflicting shortcuts in Vim to allow GoLand's default keymaps
+" e.g., You may want to avoid overriding Ctrl+C, Ctrl+V, etc.
+set noesckeys   " Disable escape sequences for certain keys like Ctrl+C, Ctrl+V, etc.

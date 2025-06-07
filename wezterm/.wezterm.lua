@@ -40,6 +40,7 @@ end
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 5000 }
 local act = wezterm.action
 
+config.keys = config.keys or {}
 -- Optional: Tab index shortcuts
 for i = 1, 9 do
 	table.insert(config.keys, {

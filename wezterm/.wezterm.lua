@@ -13,7 +13,8 @@ config.font = wezterm.font_with_fallback({
   "Symbols Nerd Font",           -- For box drawing, arrows, etc
 })
 
-config.allow_square_glyphs_to_overflow_width = "Never"
+config.font_size = 13.0
+config.line_height = 1.2
 
 config.window_background_opacity = 1
 config.window_decorations = "RESIZE"

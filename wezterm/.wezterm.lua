@@ -14,7 +14,7 @@ config.font = wezterm.font_with_fallback({
 })
 
 config.font_size = 13.0
-config.line_height = 1.2
+config.line_height = 1.23
 
 config.window_background_opacity = 1
 config.window_decorations = "RESIZE"

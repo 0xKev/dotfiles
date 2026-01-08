@@ -2,9 +2,9 @@ return {
     {
         "catppuccin/nvim",
         name = "catppuccin",
-        priority = 1000,
+        priority = 1001, -- Explicitly higher
         opts = {
-            flavour = "mocha", -- latte, frappe, macchioto, mocha
+            flavour = "mocha",
             transparent_background = true,
             dim_inactive = {
                 enabled = false,
@@ -19,14 +19,4 @@ return {
             colorscheme = "catppuccin",
         },
     },
-    -- {
-    --     "folke/tokyonight.nvim",
-    --     opts = {
-    --         transparent = true,
-    --         styles = {
-    --             sidebars = "transparent",
-    --             floats = "transparent",
-    --         },
-    --     },
-    -- },
 }

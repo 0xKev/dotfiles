@@ -1,0 +1,6 @@
+[wsl2]
+memory=16GB
+networkingMode=mirrored
+
+[experimental]
+sparseVhd=true

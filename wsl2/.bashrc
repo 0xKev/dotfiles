@@ -120,3 +120,9 @@ export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 
 alias open='explorer.exe'
 alias clip='clip.exe'
+
+# CUDA toolkit
+export PATH="/usr/local/cuda/bin:$PATH"
+
+# llama.cpp shared libraries
+export LD_LIBRARY_PATH="$HOME/tools/llama.cpp/build/bin:$LD_LIBRARY_PATH"

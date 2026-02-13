@@ -50,7 +50,7 @@ echo ""
 # 1. System packages
 # ------------------------------------------
 CURRENT_STEP="System packages"
-echo "[1/9] Installing system packages..."
+echo "[1/11] Installing system packages..."
 sudo apt-get update
 sudo apt-get install -y \
     build-essential \
@@ -63,10 +63,22 @@ sudo apt-get install -y \
     fd-find
 
 # ------------------------------------------
-# 2. CUDA Toolkit (WSL-specific install)
+# 2. WSL configuration
+# ------------------------------------------
+CURRENT_STEP="WSL configuration"
+echo "[2/11] Configuring WSL..."
+if ! grep -q "systemd=true" /etc/wsl.conf 2>/dev/null; then
+    printf '[boot]\nsystemd=true\n' | sudo tee /etc/wsl.conf >/dev/null
+    echo "Enabled systemd in /etc/wsl.conf (requires WSL restart)."
+else
+    echo "systemd already enabled in /etc/wsl.conf."
+fi
+
+# ------------------------------------------
+# 3. CUDA Toolkit (WSL-specific install)
 # ------------------------------------------
 CURRENT_STEP="CUDA Toolkit"
-echo "[2/9] Installing CUDA Toolkit..."
+echo "[3/11] Installing CUDA Toolkit..."
 if ! command -v nvcc &>/dev/null; then
     wget -q https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-keyring_1.1-1_all.deb -O /tmp/cuda-keyring.deb
     sudo dpkg -i /tmp/cuda-keyring.deb
@@ -80,10 +92,10 @@ else
 fi
 
 # ------------------------------------------
-# 3. Go
+# 4. Go
 # ------------------------------------------
 CURRENT_STEP="Go"
-echo "[3/9] Installing Go..."
+echo "[4/11] Installing Go..."
 
 # Why export here: Go and Neovim are installed to non-standard paths
 # (/usr/local/go/bin, /opt/nvim-linux-x86_64/bin). The original script
@@ -104,10 +116,26 @@ else
 fi
 
 # ------------------------------------------
-# 4. Neovim
+# 5. NVM & Node.js
+# ------------------------------------------
+CURRENT_STEP="NVM & Node.js"
+echo "[5/11] Installing NVM and Node.js..."
+export NVM_DIR="$HOME/.nvm"
+if [ ! -d "$NVM_DIR" ]; then
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm install --lts
+    echo "NVM + Node.js LTS installed."
+else
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    echo "NVM already installed: $(nvm --version), Node: $(node --version)"
+fi
+
+# ------------------------------------------
+# 6. Neovim
 # ------------------------------------------
 CURRENT_STEP="Neovim"
-echo "[4/9] Installing Neovim..."
+echo "[6/11] Installing Neovim..."
 if ! command -v nvim &>/dev/null; then
     NVIM_VERSION="v0.11.6"
     wget -q "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz" -O /tmp/nvim.tar.gz
@@ -119,10 +147,10 @@ else
 fi
 
 # ------------------------------------------
-# 5. uv + Python tooling
+# 7. uv + Python tooling
 # ------------------------------------------
 CURRENT_STEP="uv + Python tooling"
-echo "[5/9] Installing uv and Python tools..."
+echo "[7/11] Installing uv and Python tools..."
 
 # Why not `curl | sh` directly: with set -e, if the install script
 # returns non-zero for a benign reason (already installed, etc.) the
@@ -143,10 +171,10 @@ fi
 uv tool install cmake
 
 # ------------------------------------------
-# 6. Starship & Zsh Plugins
+# 8. Starship & Zsh Plugins
 # ------------------------------------------
 CURRENT_STEP="Starship & Zsh plugins"
-echo "[6/9] Installing Starship and Zsh plugins..."
+echo "[8/11] Installing Starship and Zsh plugins..."
 
 if ! command -v starship &>/dev/null; then
     curl -sS https://starship.rs/install.sh -o /tmp/starship-install.sh
@@ -175,19 +203,19 @@ if [ "$SHELL" != "$(which zsh)" ]; then
 fi
 
 # ------------------------------------------
-# 7. Directory structure
+# 9. Directory structure
 # ------------------------------------------
 CURRENT_STEP="Directory structure"
-echo "[7/9] Creating directory structure..."
+echo "[9/11] Creating directory structure..."
 mkdir -p ~/projects/{pycharm,webstorm,idea,personal}
 mkdir -p ~/tools
 mkdir -p ~/models
 
 # ------------------------------------------
-# 8. llama.cpp (clone + build with CUDA)
+# 10. llama.cpp (clone + build with CUDA)
 # ------------------------------------------
 CURRENT_STEP="llama.cpp"
-echo "[8/9] Setting up llama.cpp..."
+echo "[10/11] Setting up llama.cpp..."
 
 if [ ! -d ~/tools/llama.cpp ]; then
     git clone https://github.com/ggml-org/llama.cpp ~/tools/llama.cpp
@@ -217,10 +245,10 @@ echo "Building llama.cpp with CUDA support..."
 )
 
 # ------------------------------------------
-# 9. Dotfiles + git config
+# 11. Dotfiles + git config
 # ------------------------------------------
 CURRENT_STEP="Dotfiles + git config"
-echo "[9/9] Linking dotfiles and configuring git..."
+echo "[11/11] Linking dotfiles and configuring git..."
 
 git config --global user.name "0xKev"
 git config --global user.email "56137695+0xKev@users.noreply.github.com"
@@ -263,6 +291,7 @@ echo "  exec zsh"
 echo "  nvcc --version"
 echo "  nvidia-smi"
 echo "  go version"
+echo "  node --version"
 echo "  nvim --version"
 echo "  ~/tools/llama.cpp/build/bin/llama-cli --version"
 echo ""

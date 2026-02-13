@@ -124,6 +124,8 @@ echo "[8/8] Linking dotfiles and configuring git..."
 
 git config --global user.name "0xKev"
 git config --global user.email "56137695+0xKev@users.noreply.github.com"
+git config --global core.autocrlf false
+git config --global core.eol lf
 
 # Symlink .bashrc
 if [ -L ~/.bashrc ]; then

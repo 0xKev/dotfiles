@@ -118,6 +118,9 @@ fi
 export PATH=/usr/local/go/bin:$PATH
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 
+# Python uv
+export PATH="$HOME/.local/bin:$PATH"
+
 alias open='explorer.exe'
 alias clip='clip.exe'
 

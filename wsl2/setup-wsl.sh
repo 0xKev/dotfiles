@@ -6,11 +6,12 @@
 #   - Windows NVIDIA GPU driver installed (do NOT install Linux GPU drivers in WSL)
 #
 # Usage:
-#   git clone https://github.com/0xKev/dotfiles ~/projects/personal/dotfiles
-#   chmod +x ~/projects/personal/dotfiles/wsl2/setup-wsl.sh
-#   ~/projects/personal/dotfiles/wsl2/setup-wsl.sh
+#   git clone https://github.com/0xKev/dotfiles ~/dotfiles
+#   chmod +x ~/dotfiles/wsl2/setup-wsl.sh
+#   ~/dotfiles/wsl2/setup-wsl.sh
 
 set -e
+trap 'echo "ERROR: Script failed at line $LINENO" >&2' ERR
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -77,10 +78,18 @@ else
 fi
 
 # ------------------------------------------
-# 5. pip packages (user-level)
+# 5. uv + Python tooling
 # ------------------------------------------
-echo "[5/8] Installing pip packages..."
-pip3 install --user --break-system-packages cmake
+echo "[5/8] Installing uv and Python tools..."
+if ! command -v uv &>/dev/null; then
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    echo "uv installed."
+else
+    echo "uv already installed: $(uv --version)"
+fi
+
+export PATH="$HOME/.local/bin:$PATH"
+uv tool install cmake
 
 # ------------------------------------------
 # 6. Directory structure
@@ -142,13 +151,17 @@ else
 fi
 
 # Copy .wslconfig to Windows side (Windows can't follow Linux symlinks)
-WIN_USERPROFILE="$(cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')"
-WIN_HOME="$(wslpath "$WIN_USERPROFILE")"
-if [ -d "$WIN_HOME" ]; then
-    cp "$DOTFILES_DIR/wsl2/.wslconfig" "$WIN_HOME/.wslconfig"
-    echo "Copied .wslconfig -> $WIN_HOME/.wslconfig"
+if command -v cmd.exe &>/dev/null; then
+    WIN_USERPROFILE="$(cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')"
+    WIN_HOME="$(wslpath "$WIN_USERPROFILE")"
+    if [ -d "$WIN_HOME" ]; then
+        cp "$DOTFILES_DIR/wsl2/.wslconfig" "$WIN_HOME/.wslconfig"
+        echo "Copied .wslconfig -> $WIN_HOME/.wslconfig"
+    else
+        echo "WARNING: Could not detect Windows home directory, skipping .wslconfig copy."
+    fi
 else
-    echo "WARNING: Could not detect Windows home directory, skipping .wslconfig copy."
+    echo "WARNING: WSL interop not available, skipping .wslconfig copy."
 fi
 
 # ------------------------------------------

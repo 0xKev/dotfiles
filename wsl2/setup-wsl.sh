@@ -58,7 +58,9 @@ sudo apt-get install -y \
     curl \
     wget \
     rsync \
-    zsh
+    zsh \
+    ripgrep \
+    fd-find
 
 # ------------------------------------------
 # 2. CUDA Toolkit (WSL-specific install)
@@ -188,7 +190,7 @@ CURRENT_STEP="llama.cpp"
 echo "[8/9] Setting up llama.cpp..."
 
 if [ ! -d ~/tools/llama.cpp ]; then
-    git clone https://github.com/ggerganov/llama.cpp ~/tools/llama.cpp
+    git clone https://github.com/ggml-org/llama.cpp ~/tools/llama.cpp
 else
     echo "llama.cpp already cloned, pulling latest..."
     git -C ~/tools/llama.cpp pull

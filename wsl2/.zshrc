@@ -1,5 +1,5 @@
 ## -- Profiling hook for debugging
-## zmodload zsh/zprof
+# zmodload zsh/zprof
 
 # --- COMPLETIONS ---
 autoload -Uz compinit
@@ -108,4 +108,4 @@ else
 fi
 
 ## -- Profiling hook for debugging
-## zprof
+# zprof

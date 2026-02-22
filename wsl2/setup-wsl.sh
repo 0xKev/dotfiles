@@ -121,14 +121,19 @@ fi
 CURRENT_STEP="NVM & Node.js"
 echo "[5/11] Installing NVM and Node.js..."
 export NVM_DIR="$HOME/.nvm"
+
 if [ ! -d "$NVM_DIR" ]; then
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    nvm install --lts
-    echo "NVM + Node.js LTS installed."
+fi
+
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+if command -v node &>/dev/null; then
+    echo "NVM: $(nvm --version), Node: $(node --version)"
 else
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    echo "NVM already installed: $(nvm --version), Node: $(node --version)"
+    nvm install --lts
+    nvm alias default node
+    echo "NVM + Node.js LTS installed."
 fi
 
 # ------------------------------------------

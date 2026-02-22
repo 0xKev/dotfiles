@@ -10,7 +10,6 @@ vim.opt.expandtab = true
 vim.opt.winborder = "rounded"
 
 vim.opt.clipboard = "unnamedplus"
-
 vim.g.clipboard = {
     name = "OSC 52",
     copy = {
@@ -18,7 +17,11 @@ vim.g.clipboard = {
         ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
     },
     paste = {
-        ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
-        ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+        ["+"] = function()
+            return vim.split(vim.fn.getreg('"'), "\n")
+        end,
+        ["*"] = function()
+            return vim.split(vim.fn.getreg('"'), "\n")
+        end,
     },
 }

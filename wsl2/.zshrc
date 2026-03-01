@@ -62,6 +62,7 @@ bindkey "^[[F"  end-of-line
 # --- PATH (guarded) ---
 _prepend_path() { [[ -d "$1" ]] && path=("$1" $path) }
 
+_prepend_path "$HOME/.nvm/versions/node/$(ls ~/.nvm/versions/node/ | sort -V | tail -1)/bin"
 _prepend_path "/usr/local/go/bin"
 _prepend_path "$HOME/go/bin"
 _prepend_path "/opt/nvim-linux-x86_64/bin"

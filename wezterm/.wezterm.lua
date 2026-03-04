@@ -1,10 +1,13 @@
 local wezterm = require("wezterm")
+wezterm.log_info("Config loaded!")
 local config = wezterm.config_builder()
 local act = wezterm.action
 
 config.front_end = "OpenGL"
 config.max_fps = 120
 config.animation_fps = 10
+
+config.enable_kitty_keyboard = true
 
 config.font = wezterm.font_with_fallback({
   "JetBrainsMono Nerd Font",

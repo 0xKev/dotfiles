@@ -50,7 +50,7 @@ echo ""
 # 1. System packages
 # ------------------------------------------
 CURRENT_STEP="System packages"
-echo "[1/11] Installing system packages..."
+echo "[1/12] Installing system packages..."
 sudo apt-get update
 sudo apt-get install -y \
     build-essential \
@@ -60,13 +60,14 @@ sudo apt-get install -y \
     rsync \
     zsh \
     ripgrep \
-    fd-find
+    fd-find \
+    postgresql-client
 
 # ------------------------------------------
 # 2. WSL configuration
 # ------------------------------------------
 CURRENT_STEP="WSL configuration"
-echo "[2/11] Configuring WSL..."
+echo "[2/12] Configuring WSL..."
 if ! grep -q "systemd=true" /etc/wsl.conf 2>/dev/null; then
     printf '[boot]\nsystemd=true\n' | sudo tee /etc/wsl.conf >/dev/null
     echo "Enabled systemd in /etc/wsl.conf (requires WSL restart)."
@@ -78,7 +79,7 @@ fi
 # 3. CUDA Toolkit (WSL-specific install)
 # ------------------------------------------
 CURRENT_STEP="CUDA Toolkit"
-echo "[3/11] Installing CUDA Toolkit..."
+echo "[3/12] Installing CUDA Toolkit..."
 if ! command -v nvcc &>/dev/null; then
     wget -q https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-keyring_1.1-1_all.deb -O /tmp/cuda-keyring.deb
     sudo dpkg -i /tmp/cuda-keyring.deb
@@ -95,7 +96,7 @@ fi
 # 4. Go
 # ------------------------------------------
 CURRENT_STEP="Go"
-echo "[4/11] Installing Go..."
+echo "[4/12] Installing Go..."
 
 # Why export here: Go and Neovim are installed to non-standard paths
 # (/usr/local/go/bin, /opt/nvim-linux-x86_64/bin). The original script
@@ -116,10 +117,36 @@ else
 fi
 
 # ------------------------------------------
-# 5. NVM & Node.js
+# 5. golang-migrate
+# ------------------------------------------
+CURRENT_STEP="golang-migrate"
+echo "[5/12] Installing golang-migrate..."
+
+# Why .deb over `go install`: the pre-built .deb is already compiled with
+# all database drivers included. `go install` requires explicit -tags flags
+# (e.g. -tags 'postgres') at build time or the binary silently ships with
+# no drivers and fails at runtime with a cryptic "unknown driver" error.
+# The .deb also registers with dpkg so it shows up in `apt list --installed`.
+#
+# Why pin a version: /releases/latest/download/ is convenient but unpinned.
+# A breaking CLI change in a future release would silently affect fresh
+# setups. Bump MIGRATE_VERSION here when you want to upgrade.
+if ! command -v migrate &>/dev/null; then
+    MIGRATE_VERSION="v4.19.1"
+    wget -q "https://github.com/golang-migrate/migrate/releases/download/${MIGRATE_VERSION}/migrate.linux-amd64.deb" \
+        -O /tmp/migrate.deb
+    sudo dpkg -i /tmp/migrate.deb
+    rm /tmp/migrate.deb
+    echo "golang-migrate ${MIGRATE_VERSION} installed."
+else
+    echo "golang-migrate already installed: $(migrate -version)"
+fi
+
+# ------------------------------------------
+# 6. NVM & Node.js
 # ------------------------------------------
 CURRENT_STEP="NVM & Node.js"
-echo "[5/11] Installing NVM and Node.js..."
+echo "[6/12] Installing NVM and Node.js..."
 export NVM_DIR="$HOME/.nvm"
 
 if [ ! -d "$NVM_DIR" ]; then
@@ -137,10 +164,10 @@ else
 fi
 
 # ------------------------------------------
-# 6. Neovim
+# 7. Neovim
 # ------------------------------------------
 CURRENT_STEP="Neovim"
-echo "[6/11] Installing Neovim..."
+echo "[7/12] Installing Neovim..."
 if ! command -v nvim &>/dev/null; then
     NVIM_VERSION="v0.11.6"
     wget -q "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz" -O /tmp/nvim.tar.gz
@@ -152,10 +179,10 @@ else
 fi
 
 # ------------------------------------------
-# 7. uv + Python tooling
+# 8. uv + Python tooling
 # ------------------------------------------
 CURRENT_STEP="uv + Python tooling"
-echo "[7/11] Installing uv and Python tools..."
+echo "[8/12] Installing uv and Python tools..."
 
 # Why not `curl | sh` directly: with set -e, if the install script
 # returns non-zero for a benign reason (already installed, etc.) the
@@ -176,10 +203,10 @@ fi
 uv tool install cmake
 
 # ------------------------------------------
-# 8. Starship & Zsh Plugins
+# 9. Starship & Zsh Plugins
 # ------------------------------------------
 CURRENT_STEP="Starship & Zsh plugins"
-echo "[8/11] Installing Starship and Zsh plugins..."
+echo "[9/12] Installing Starship and Zsh plugins..."
 
 if ! command -v starship &>/dev/null; then
     curl -sS https://starship.rs/install.sh -o /tmp/starship-install.sh
@@ -208,19 +235,19 @@ if [ "$SHELL" != "$(which zsh)" ]; then
 fi
 
 # ------------------------------------------
-# 9. Directory structure
+# 10. Directory structure
 # ------------------------------------------
 CURRENT_STEP="Directory structure"
-echo "[9/11] Creating directory structure..."
+echo "[10/12] Creating directory structure..."
 mkdir -p ~/projects/{pycharm,webstorm,idea,personal}
 mkdir -p ~/tools
 mkdir -p ~/models
 
 # ------------------------------------------
-# 10. llama.cpp (clone + build with CUDA)
+# 11. llama.cpp (clone + build with CUDA)
 # ------------------------------------------
 CURRENT_STEP="llama.cpp"
-echo "[10/11] Setting up llama.cpp..."
+echo "[11/12] Setting up llama.cpp..."
 
 if [ ! -d ~/tools/llama.cpp ]; then
     git clone https://github.com/ggml-org/llama.cpp ~/tools/llama.cpp
@@ -250,10 +277,10 @@ echo "Building llama.cpp with CUDA support..."
 )
 
 # ------------------------------------------
-# 11. Dotfiles + git config
+# 12. Dotfiles + git config
 # ------------------------------------------
 CURRENT_STEP="Dotfiles + git config"
-echo "[11/11] Linking dotfiles and configuring git..."
+echo "[12/12] Linking dotfiles and configuring git..."
 
 git config --global user.name "0xKev"
 git config --global user.email "56137695+0xKev@users.noreply.github.com"
@@ -298,6 +325,8 @@ echo "  nvidia-smi"
 echo "  go version"
 echo "  node --version"
 echo "  nvim --version"
+echo "  psql --version"
+echo "  migrate --version"
 echo "  ~/tools/llama.cpp/build/bin/llama-cli --version"
 echo ""
 echo "To migrate projects from Windows:"

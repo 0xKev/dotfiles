@@ -39,3 +39,26 @@ vim.api.nvim_create_autocmd("FileType", {
         end
     end,
 })
+
+vim.api.nvim_create_autocmd("SwapExists", {
+    callback = function()
+        local swap_info = vim.fn.swapinfo(vim.v.swapname)
+        local pid = swap_info.pid
+
+        -- no pid info means we can't determine state, let Neovim prompt
+        if not pid or pid == 0 then
+            return
+        end
+
+        -- only auto-delete if the swap was created on this machine
+        if swap_info.host ~= vim.fn.hostname() then
+            return
+        end
+
+        -- if the process is dead, the swap is stale — safe to delete
+        local process_alive = vim.uv.kill(pid, 0) == 0
+        if not process_alive then
+            vim.v.swapchoice = "d"
+        end
+    end,
+})
